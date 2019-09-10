@@ -12,40 +12,26 @@ class CXParser extends StandardTokenParsers with PackratParsers {
 
   def type_name: Parser[String] = "int" | "bool"
 
-  def build_binary_op(x: Expr ~ String ~ Expr): BinaryOp =
-    x match { case a ~ op ~ b => BinaryOp(op, a, b) }
-
   lazy val expression: PackratParser[Expr] = assignment_expression
 
   lazy val assignment_expression: PackratParser[Expr] =
     (ident <~ "=") ~ assignment_expression ^^ { case i ~ e => AssignExpr(Identifier(i), e)} |
-    logical_or_expression
+    constant_expression
 
-//  lazy val constant_expression: PackratParser[Expr] = logical_or_expression
+  def build_binary_op_expr(old_expr: PackratParser[Expr], op: Parser[String]): PackratParser[Expr] = {
+    lazy val new_expr: PackratParser[Expr] =
+      new_expr ~ op ~ old_expr ^^ { case a ~ op ~ b => BinaryOp(op, a, b) } |
+        old_expr
+    new_expr
+  }
 
-  lazy val logical_or_expression: PackratParser[Expr] =
-    logical_or_expression ~ "||" ~ logical_and_expression ^^ build_binary_op |
-    logical_and_expression
-
-  lazy val logical_and_expression: PackratParser[Expr] =
-    logical_and_expression ~ "&&" ~ equality_expression ^^ build_binary_op |
-    equality_expression
-
-  lazy val equality_expression: PackratParser[Expr] =
-    equality_expression ~ ("==" | "!=") ~ relational_expression ^^ build_binary_op |
-    relational_expression
-
-  lazy val relational_expression: PackratParser[Expr] =
-    relational_expression ~ ("<" | ">" | "<=" | ">=") ~ additive_expression ^^ build_binary_op |
-    additive_expression
-
-  lazy val additive_expression: PackratParser[Expr] =
-    additive_expression ~ ("+" | "-") ~ multiplicative_expression ^^ build_binary_op |
-    multiplicative_expression
-
-  lazy val multiplicative_expression: PackratParser[Expr] =
-    multiplicative_expression ~ ("*" | "/" | "%") ~ cast_expression ^^ build_binary_op |
-    cast_expression
+  lazy val constant_expression: PackratParser[Expr] = List[Parser[String]](
+    "*" | "/" | "%",
+    "+" | "-",
+    "<" | ">" | "<=" | ">=",
+    "==" | "!=",
+    "&&",
+    "||").foldLeft(cast_expression)(build_binary_op_expr)
 
   lazy val cast_expression: PackratParser[Expr] =
     unary_expression |
@@ -65,19 +51,6 @@ class CXParser extends StandardTokenParsers with PackratParsers {
     numericLit ^^ { a => Num(a.toInt) } |
     ident ^^ { Identifier } |
     "(" ~> expression <~ ")"
-
-//  def stmt: Parser[Stmt] =
-//    "read" ~> ident <~ ";" ^^ { ReadStmt } |
-//    "write" ~> expr <~ ";" ^^ { WriteStmt } |
-//    ident ~> "=" ~ expr <~ ";" ^^ { case i ~ e => AssignStmt(i, e) } |
-//    ("int" | "bool") ~ ident <~ ";" ^^ { case t ~ i => DeclStmt(t, i) }
-//
-//  lazy val  stmts: PackratParser[List[Stmt]] =
-//    rep(stmts) ^^ { _.flatten }
-//    "{" ~>  rep(stmt) <~ "}" ^^ identity |
-//    stmt ^^ { List(_) }
-//
-//  val program: Parser[List[Stmt]] = stmts
 
   def parseAll[T](p: Parser[T], in: String): ParseResult[T] = {
     phrase(p)(new lexical.Scanner(in))

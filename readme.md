@@ -6,7 +6,7 @@ https://github.com/travisdazell/javaone-2013-BOF-small-language
 
 Q: PCode 解释器？
 
-
+https://cs.wmich.edu/~gupta/teaching/cs4850/sumII06/The%20syntax%20of%20C%20in%20Backus-Naur%20form.htm
 
 ```
 The syntax of C in Backus-Naur Form
@@ -59,39 +59,23 @@ The syntax of C in Backus-Naur Form
                       | <direct-declarator> ( <parameter-type-list> )
                       | <direct-declarator> ( {<identifier>}* )
 
-<constant-expression> ::= <conditional-expression>
-
-<conditional-expression> ::= <logical-or-expression>
-                           | <logical-or-expression> ? <expression> : <conditional-expression>
+<constant-expression> ::= <logical-or-expression>
 
 <logical-or-expression> ::= <logical-and-expression>
                           | <logical-or-expression> || <logical-and-expression>
 
-<logical-and-expression> ::= <inclusive-or-expression>
-                           | <logical-and-expression> && <inclusive-or-expression>
-
-<inclusive-or-expression> ::= <exclusive-or-expression>
-                            | <inclusive-or-expression> | <exclusive-or-expression>
-
-<exclusive-or-expression> ::= <and-expression>
-                            | <exclusive-or-expression> ^ <and-expression>
-
-<and-expression> ::= <equality-expression>
-                   | <and-expression> & <equality-expression>
+<logical-and-expression> ::= <equality-expression>
+                           | <logical-and-expression> && <equality-expression>
 
 <equality-expression> ::= <relational-expression>
                         | <equality-expression> == <relational-expression>
                         | <equality-expression> != <relational-expression>
 
-<relational-expression> ::= <shift-expression>
+<relational-expression> ::= <additive-expression>
                           | <relational-expression> < <shift-expression>
                           | <relational-expression> > <shift-expression>
                           | <relational-expression> <= <shift-expression>
                           | <relational-expression> >= <shift-expression>
-
-<shift-expression> ::= <additive-expression>
-                     | <shift-expression> << <additive-expression>
-                     | <shift-expression> >> <additive-expression>
 
 <additive-expression> ::= <multiplicative-expression>
                         | <additive-expression> + <multiplicative-expression>
@@ -130,7 +114,7 @@ The syntax of C in Backus-Naur Form
 <expression> ::= <assignment-expression>
                | <expression> , <assignment-expression>
 
-<assignment-expression> ::= <conditional-expression>
+<assignment-expression> ::= <logical-or-expression>
                           | <unary-expression> <assignment-operator> <assignment-expression>
 
 <assignment-operator> ::= =
