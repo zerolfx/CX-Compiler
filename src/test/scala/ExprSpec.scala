@@ -14,7 +14,7 @@ class ExprSpec extends FlatSpec {
 
   it should "parse a = 1" in {
     parser.parseAll(parser.expression, "a = 1") match {
-      case parser.Success(r, _) => assert(r == AssignExpr(Identifier("a"), Num(1)))
+      case parser.Success(r, _) => assert(r == AssignExpr(SingleIdentifier("a"), Num(1)))
     }
   }
 }

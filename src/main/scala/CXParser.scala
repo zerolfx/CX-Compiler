@@ -8,14 +8,29 @@ class CXParser extends StandardTokenParsers with PackratParsers {
   lexical.reserved ++= List("int", "bool", "if", "else", "while", "write", "read", "repeat", "until", "do",
     "exit", "for", "const", "function", "record")
   lexical.delimiters ++= List("++", "--", "+", "-", "*", "/", "<", "<=", ">", ">=", "==", "!=", "=", "||", "&&", "!", ";", "(",
-    ")", "{", "}", "/*", "*/")
+    ")", "{", "}", "/*", "*/", ",")
 
-  def type_name: Parser[String] = "int" | "bool"
+  def type_specifier: Parser[String] = "int" | "bool"
+
+  def declaration_specifier: Parser[(String, Boolean)] =
+    type_specifier ^^ { (_, false) }|
+    "const" ~> type_specifier ^^ { (_, true) }
+
+  lazy val declaration: Parser[DeclarationStmt] =
+    declaration_specifier ~ repsep(init_declarator, ",") ^^ { case d ~ i => DeclarationStmt(d, i) }
+
+  lazy val init_declarator: PackratParser[(Identifier, Option[Expr])] =
+    (declarator <~ "=") ~ assignment_expression ^^ { case d ~ e => (d, Some(e))} |
+    declarator ^^ { (_, None) }
+
+  lazy val declarator: PackratParser[Identifier] =
+    ident ^^ { SingleIdentifier } |
+    ident ~ ("[" ~> constant_expression <~ "]").* ^^ { case i ~ e => ArrayIdentifier(i, e) }
 
   lazy val expression: PackratParser[Expr] = assignment_expression
 
   lazy val assignment_expression: PackratParser[Expr] =
-    (ident <~ "=") ~ assignment_expression ^^ { case i ~ e => AssignExpr(Identifier(i), e)} |
+    (ident <~ "=") ~ assignment_expression ^^ { case i ~ e => AssignExpr(SingleIdentifier(i), e)} |
     constant_expression
 
   def build_binary_op_expr(old_expr: PackratParser[Expr], op: Parser[String]): PackratParser[Expr] = {
@@ -35,7 +50,7 @@ class CXParser extends StandardTokenParsers with PackratParsers {
 
   lazy val cast_expression: PackratParser[Expr] =
     unary_expression |
-    ("(" ~> type_name <~ ")") ~ cast_expression ^^ { case tp ~ e => CastExpr(tp, e) }
+    ("(" ~> type_specifier <~ ")") ~ cast_expression ^^ { case tp ~ e => CastExpr(tp, e) }
 
   lazy val unary_expression: PackratParser[Expr] =
     postfix_expression |
@@ -44,13 +59,28 @@ class CXParser extends StandardTokenParsers with PackratParsers {
 
   lazy val postfix_expression: PackratParser[Expr] =
     primary_expression |
-    postfix_expression ~ ("++" | "--") ^^ { case e ~ op => UnaryOp("_" + op, e) } |
-    postfix_expression ~ ("[" ~> expression <~ "]") ^^ { case a ~ b => BinaryOp("[]", a, b) }
+    postfix_expression ~ ("++" | "--") ^^ { case e ~ op => UnaryOp("_" + op, e) }
 
   lazy val primary_expression: PackratParser[Expr] =
     numericLit ^^ { a => Num(a.toInt) } |
-    ident ^^ { Identifier } |
+    identifier |
     "(" ~> expression <~ ")"
+
+
+  lazy val identifier: PackratParser[Identifier] =
+    ident ~ rep("[" ~> expression <~ "]") ^^ { case i ~ e => ArrayIdentifier(i, e) } |
+    ident ^^ { SingleIdentifier }
+
+  lazy val compound_statement: PackratParser[CompoundStmt] =
+    "{" ~> statement.* <~ "}" ^^ CompoundStmt
+
+  lazy val statement: PackratParser[Stmt] =
+    expression <~ ";" |
+    declaration <~ ";" |
+    compound_statement |
+    "read" ~> identifier |
+    "write" ~> identifier |
+    ";" ^^ { _ => EmptyStmt() }
 
   def parseAll[T](p: Parser[T], in: String): ParseResult[T] = {
     phrase(p)(new lexical.Scanner(in))

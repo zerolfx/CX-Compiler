@@ -2,13 +2,16 @@ package model
 
 import scala.util.parsing.input.Positional
 
-class Expr extends Positional
+class Expr extends Stmt
 
 case class Num(value: Int) extends Expr
 
 case class BinaryOp(op: String, var left: Expr, right: Expr) extends Expr
 
-case class Identifier(name: String) extends Expr
+class Identifier extends Expr
+
+case class ArrayIdentifier(name: String, sub: List[Expr]) extends Identifier
+case class SingleIdentifier(name: String) extends Identifier
 
 case class UnaryOp(op: String, expr: Expr) extends Expr
 

@@ -6,7 +6,7 @@ object Run extends App {
   val inputSource = inputFile.mkString
 
   val parser = new CXParser
-  parser.parseAll(parser.expression, inputSource) match {
+  parser.parseAll(parser.statement, inputSource) match {
     case parser.Success(r, n) =>
       println(r)
     case parser.NoSuccess(err, next) =>
