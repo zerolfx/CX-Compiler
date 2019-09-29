@@ -171,11 +171,9 @@ The syntax of C in Backus-Naur Form
 <declaration> ::=  {<declaration-specifier>}+ {<init-declarator>}* ;
 
 <init-declarator> ::= <declarator>
-                    | <declarator> = <initializer>
+                    | <declarator> = <assignment-expression>
 
 <initializer> ::= <assignment-expression>
-                | { <initializer-list> }
-                | { <initializer-list> , }
 
 <initializer-list> ::= <initializer>
                      | <initializer-list> , <initializer>

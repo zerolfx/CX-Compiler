@@ -1,20 +1,25 @@
-import jdk.nashorn.internal.ir.Block
 import model._
 
 import scala.util.parsing.combinator.PackratParsers
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 
-class CXParser extends StandardTokenParsers with PackratParsers {
+class CXParser extends StandardTokenParsers
+  with PackratParsers {
   lexical.reserved ++= List("int", "bool", "if", "else", "while", "write", "read", "repeat", "until", "do",
     "exit", "for", "const", "function", "record")
   lexical.delimiters ++= List("++", "--", "+", "-", "*", "/", "<", "<=", ">", ">=", "==", "!=", "=", "||", "&&", "!", ";", "(",
     ")", "{", "}", "/*", "*/", ",")
 
-  def type_specifier: Parser[String] = "int" | "bool"
+  lazy val type_specifier: PackratParser[Type] =
+    "int" ^^ { _ => new CXInt() } |
+    "real" ^^ { _ => new CXReal() } |
+    "bool" ^^ { _ => new CXBool() }
 
-  def declaration_specifier: Parser[(String, Boolean)] =
-    type_specifier ^^ { (_, false) }|
-    "const" ~> type_specifier ^^ { (_, true) }
+  lazy val declaration_specifier: PackratParser[Type] =
+    opt("const") ~ type_specifier ^^ {
+      case None ~ tp => tp
+      case Some(_) ~ tp => tp.toConst
+    }
 
   lazy val declaration: Parser[DeclarationStmt] =
     declaration_specifier ~ repsep(init_declarator, ",") ^^ { case d ~ i => DeclarationStmt(d, i) }

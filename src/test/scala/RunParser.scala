@@ -1,7 +1,7 @@
 import scala.io.Source
 
 
-object Run extends App {
+object RunParser extends App {
   val inputFile = Source.fromFile("src/test/cx/expr.cx")
   val inputSource = inputFile.mkString
 

@@ -15,6 +15,6 @@ case class SingleIdentifier(name: String) extends Identifier
 
 case class UnaryOp(op: String, expr: Expr) extends Expr
 
-case class CastExpr(tp: String, expr: Expr) extends Expr
+case class CastExpr(tp: Type, expr: Expr) extends Expr
 
 case class AssignExpr(id: Identifier, expr: Expr) extends Expr
