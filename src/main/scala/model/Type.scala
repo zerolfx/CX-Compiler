@@ -6,31 +6,36 @@ abstract class Type {
     `const` = true
     this
   }
-  val code: Char
+  val code: Ins.T
   def getSize: Int
 }
 
-class CXInt extends Type {
-  val code = 'i'
+object CXInt extends Type {
+  val code = Ins.i
   override def getSize: Int = 1
 }
 
-class CXReal extends Type {
-  val code = 'r'
+object CXReal extends Type {
+  val code = Ins.c
   override def getSize: Int = 1
 }
 
-class CXAddr(baseType: Type) extends Type {
-  val code = 'a'
+case class CXAddr(baseType: Type) extends Type {
+  val code = Ins.a
   override def getSize: Int = 1
 }
 
-class CXBool extends Type {
-  val code = 'b'
+object CXBool extends Type {
+  val code = Ins.b
   override def getSize: Int = 1
 }
 
-class CXArray(baseType: Type, shape: List[Int]) extends Type {
+case class CXArray(baseType: Type, shape: List[Int]) extends Type {
   val code = baseType.code
   override def getSize: Int = shape.product
+}
+
+object DummyType extends Type {
+  override val code: Ins.T = Ins.i
+  override def getSize: Int = 0
 }

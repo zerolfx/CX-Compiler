@@ -1,5 +1,3 @@
-import model.Scope
-
 import scala.io.Source
 
 
@@ -11,9 +9,10 @@ object Compiler extends App {
   parser.parseAll(parser.statement, inputSource) match {
     case parser.Success(r, n) =>
       println(r)
-      val code = (new CXCodeGenerator).gen_statement(r, new Scope(None))
+      val code = r.gen + "hlt\n"
       println(code)
-      (new PCodeVM).interpreter(code)
+      reflect.io.File("t.p").writeAll(code)
+      sys.process.Process("./src/test/binary/Pmachine t.p").!
     case parser.NoSuccess(err, next) =>
       println("failed to parse CX input " +
         "(line " + next.pos.line + ", column " + next.pos.column + "):\n" +

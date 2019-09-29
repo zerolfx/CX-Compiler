@@ -11,9 +11,9 @@ class CXParser extends StandardTokenParsers
     ")", "{", "}", "/*", "*/", ",")
 
   lazy val type_specifier: PackratParser[Type] =
-    "int" ^^ { _ => new CXInt() } |
-    "real" ^^ { _ => new CXReal() } |
-    "bool" ^^ { _ => new CXBool() }
+    "int" ^^ { _ => CXInt } |
+    "real" ^^ { _ => CXReal } |
+    "bool" ^^ { _ => CXBool }
 
   lazy val declaration_specifier: PackratParser[Type] =
     opt("const") ~ type_specifier ^^ {
@@ -67,7 +67,7 @@ class CXParser extends StandardTokenParsers
     postfix_expression ~ ("++" | "--") ^^ { case e ~ op => UnaryOp("_" + op, e) }
 
   lazy val primary_expression: PackratParser[Expr] =
-    numericLit ^^ { a => Num(a.toInt) } |
+    numericLit ^^ { Num } |
     identifier |
     "(" ~> expression <~ ")"
 
@@ -83,8 +83,8 @@ class CXParser extends StandardTokenParsers
     expression <~ ";" |
     declaration <~ ";" |
     compound_statement |
-    "read" ~> identifier |
-    "write" ~> identifier |
+    "read" ~> identifier <~ ";" |
+    "write" ~> expression <~ ";" ^^ { WriteStmt } |
     ";" ^^ { _ => EmptyStmt() }
 
   def parseAll[T](p: Parser[T], in: String): ParseResult[T] = {
