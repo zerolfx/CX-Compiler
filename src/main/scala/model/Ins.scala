@@ -11,6 +11,7 @@ object Ins {
   object c extends T { override def toString: String = "c"}
 
   // TODO change T to N
+  def pop = "pop\n"
   def add(t: T) = f"add $t\n"
   def sub(t: T) = f"sub $t\n"
   def mul(t: T) = f"mul $t\n"
@@ -31,10 +32,18 @@ object Ins {
   def sro(t: T, q: Int) = f"sro $t $q\n"
   def sto(t: T) = f"sto $t\n"
   def ujp(label: String) = f"ujp $label\n"
+  def lod(t: T, p: Int, q: Int) = f"lod $t $p $q\n"
+  def lda(t: T, p: Int, q: Int) = f"lda $t $p $q\n"
+  def str(t: T, p: Int, q: Int) = f"str $t $p $q\n"
+
+  def ssp(p: Int) = f"ssp $p\n"
+  def dpl(t: T) = f"dpl $t\n"
+
   def f(label: String) = f"f $label\n"
   def out(t: T) = f"out $t\n"
   def in(t: T) = {
     assert(t != a)
     f"in $t \n"
   }
+  def conv(from: T, to: T) = f"conv $from $to\n"
 }

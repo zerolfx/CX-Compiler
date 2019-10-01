@@ -1,3 +1,5 @@
+import model.Env
+
 import scala.io.Source
 
 
@@ -6,10 +8,10 @@ object Compiler extends App {
   val inputSource = inputFile.mkString
 
   val parser = new CXParser
-  parser.parseAll(parser.statement, inputSource) match {
+  parser.parseAll(parser.program, inputSource) match {
     case parser.Success(r, n) =>
       println(r)
-      val code = r.gen + "hlt\n"
+      val code = r.gen(new Env(None)) + "hlt\n"
       println(code)
       reflect.io.File("t.p").writeAll(code)
       sys.process.Process("./src/test/binary/Pmachine t.p").!

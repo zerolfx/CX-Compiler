@@ -67,25 +67,27 @@ class CXParser extends StandardTokenParsers
     postfix_expression ~ ("++" | "--") ^^ { case e ~ op => UnaryOp("_" + op, e) }
 
   lazy val primary_expression: PackratParser[Expr] =
-    numericLit ^^ { Num } |
+    numericLit ^^ Num |
     identifier |
     "(" ~> expression <~ ")"
 
 
   lazy val identifier: PackratParser[Identifier] =
-    ident ~ rep("[" ~> expression <~ "]") ^^ { case i ~ e => ArrayIdentifier(i, e) } |
-    ident ^^ { SingleIdentifier }
+    ident ~ rep1("[" ~> expression <~ "]") ^^ { case i ~ e => ArrayIdentifier(i, e) } |
+    ident ^^ SingleIdentifier
 
   lazy val compound_statement: PackratParser[CompoundStmt] =
     "{" ~> statement.* <~ "}" ^^ CompoundStmt
 
   lazy val statement: PackratParser[Stmt] =
-    expression <~ ";" |
+    expression <~ ";" ^^ ExprStmt |
     declaration <~ ";" |
     compound_statement |
-    "read" ~> identifier <~ ";" |
-    "write" ~> expression <~ ";" ^^ { WriteStmt } |
-    ";" ^^ { _ => EmptyStmt() }
+    "read" ~> identifier <~ ";" ^^ ReadStmt |
+    "write" ~> expression <~ ";" ^^ WriteStmt |
+    ";" ^^ { _ => EmptyStmt }
+
+  lazy val program: PackratParser[Program] = compound_statement ^^ { Program }
 
   def parseAll[T](p: Parser[T], in: String): ParseResult[T] = {
     phrase(p)(new lexical.Scanner(in))

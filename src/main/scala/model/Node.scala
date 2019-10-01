@@ -1,5 +1,5 @@
 package model
 
 abstract class Node {
-  def gen: String
+  def gen(implicit env: Env): String
 }

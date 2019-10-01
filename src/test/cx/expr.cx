@@ -1,3 +1,5 @@
 {
-write 2333 + 4599;
+int x = 10, y = 2;
+y = x = x + 1;
+write x * y;
 }
