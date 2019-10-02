@@ -1,19 +1,40 @@
 import model._
 
 import scala.util.parsing.combinator.PackratParsers
+import scala.util.parsing.combinator.JavaTokenParsers
+import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
+
+class CXStdLexer extends StdLexical {
+  // to support float number
+  override def token: Parser[Token] =
+    rep(digit) ~ '.' ~ rep(digit) ^^ { case a ~ b ~ c => NumericLit(a.mkString + b + c.mkString) } |
+    super.token
+}
 
 class CXParser extends StandardTokenParsers
   with PackratParsers {
-  lexical.reserved ++= List("int", "bool", "if", "else", "while", "write", "read", "repeat", "until", "do",
-    "exit", "for", "const", "function", "record")
-  lexical.delimiters ++= List("++", "--", "+", "-", "*", "/", "<", "<=", ">", ">=", "==", "!=", "=", "||", "&&", "!", ";", "(",
+  override val lexical = new CXStdLexer
+
+  lexical.reserved ++= List(
+    "int", "bool", "real", "const", // type
+    "if", "else", // selection
+    "while", "repeat", "until", "do", "for", // loop
+    "write", "read", // builtins
+    "exit",  "function", "return"
+  )
+  lexical.delimiters ++= List(
+    "++", "--",
+    "+", "-", "*", "/", "%",
+    "<", "<=", ">", ">=", "==", "!=", "=",
+    "||", "&&", "!", ";", "(",
     ")", "{", "}", "/*", "*/", ",")
 
-  lazy val type_specifier: PackratParser[Type] =
-    "int" ^^ { _ => CXInt } |
-    "real" ^^ { _ => CXReal } |
-    "bool" ^^ { _ => CXBool }
+  lazy val type_specifier: Parser[Type] =
+    "int" ^^ { _ => CXInt() } |
+    "real" ^^ { _ => CXReal() } |
+    "bool" ^^ { _ => CXBool() } |
+    "void" ^^^ CXVoid
 
   lazy val declaration_specifier: PackratParser[Type] =
     opt("const") ~ type_specifier ^^ {
@@ -22,7 +43,7 @@ class CXParser extends StandardTokenParsers
     }
 
   lazy val declaration: Parser[DeclarationStmt] =
-    declaration_specifier ~ repsep(init_declarator, ",") ^^ { case d ~ i => DeclarationStmt(d, i) }
+    declaration_specifier ~ rep1sep(init_declarator, ",") ^^ { case d ~ i => DeclarationStmt(d, i) }
 
   lazy val init_declarator: PackratParser[(Identifier, Option[Expr])] =
     (declarator <~ "=") ~ assignment_expression ^^ { case d ~ e => (d, Some(e))} |
@@ -67,6 +88,7 @@ class CXParser extends StandardTokenParsers
     postfix_expression ~ ("++" | "--") ^^ { case e ~ op => UnaryOp("_" + op, e) }
 
   lazy val primary_expression: PackratParser[Expr] =
+    ident ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ { case id ~ args => FunctionCallExpr(id, args) } |
     numericLit ^^ Num |
     identifier |
     "(" ~> expression <~ ")"
@@ -85,9 +107,20 @@ class CXParser extends StandardTokenParsers
     compound_statement |
     "read" ~> identifier <~ ";" ^^ ReadStmt |
     "write" ~> expression <~ ";" ^^ WriteStmt |
-    ";" ^^ { _ => EmptyStmt }
+    ";" ^^^  EmptyStmt |
+    "if" ~> ("(" ~> expression <~ ")") ~ statement ~ opt("else" ~> statement) ^^ {
+      case e ~ s1 ~ s2 => IfStmt(e, s1, s2.getOrElse(EmptyStmt))
+    } |
+    "return" ~> opt(expression) <~ ";" ^^ ReturnStmt
 
-  lazy val program: PackratParser[Program] = compound_statement ^^ { Program }
+  lazy val program: PackratParser[Program] = rep(function) ~ compound_statement ^^ {
+    case f ~ p => Program(f, p)
+  }
+
+  lazy val function: PackratParser[Fun] =
+    declaration_specifier ~ ident ~ ("(" ~> repsep(declaration_specifier ~ identifier, ",") <~ ")") ~ compound_statement ^^ {
+      case tp ~ id ~ args ~ stmts => Fun(id, tp, args.map { case tp ~ id => (id, tp) }, stmts)
+    }
 
   def parseAll[T](p: Parser[T], in: String): ParseResult[T] = {
     phrase(p)(new lexical.Scanner(in))

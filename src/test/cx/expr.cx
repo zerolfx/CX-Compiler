@@ -1,5 +1,37 @@
-{
-int x = 10, y = 2;
-y = x = x + 1;
-write x * y;
+int gcd(int x, int y) {
+    if (y == 0) return x;
+    return gcd(y, x % y);
 }
+int fac(int x) {
+    if (x == 0) return 1;
+    return x * fac(x - 1);
+}
+int mul2(int x) {
+    int ret = 2;
+    return ret * x;
+}
+{
+int x = 0, y = 0, z = 0;
+// x = (y = 1) = z = 2;
+write gcd(12, 18);
+write fac(10);
+write mul2(13);
+}
+
+/*
+{
+int x = 10;
+{
+    int z = 2;
+    write x + z;
+}
+const int y = 2;
+x = x + 1;
+write x * y;
+
+
+if (y == 1) write 100;
+else write 101;
+write 2;
+}
+*/
