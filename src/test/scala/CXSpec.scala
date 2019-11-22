@@ -1,5 +1,4 @@
-import model._
-import org.scalatest.{FlatSpec, FunSuite}
+import org.scalatest.FunSuite
 
 
 class CXSpec extends FunSuite {
@@ -63,5 +62,67 @@ class CXSpec extends FunSuite {
         |}
         |""".stripMargin
     ok(code)(List(6))
+  }
+
+  test("simple for") {
+    val code =
+      """
+        |{
+        |int i = 1, s = 0;
+        |for (; i < 10; i = i + 1) s = s + i;
+        |write s;
+        |}
+        |""".stripMargin
+    ok(code)(List(45))
+  }
+
+  test("simple while") {
+    val code =
+      """
+        |{
+        |int i = 0, s = 0;
+        |while (i < 10) {
+        |s = s + i;
+        |i = i + 1;
+        |}
+        |write s;
+        |}
+        |""".stripMargin
+    ok(code)(List(45))
+  }
+
+  test("function without parameter") {
+    val code =
+      """
+        |int f() { return 1; }
+        |{ write f(); }
+        |""".stripMargin
+    ok(code)(List(1))
+  }
+
+  test("function call function") {
+    val code =
+      """
+        |int f() { return 1; }
+        |int g() { return f(); }
+        |{ write g(); }
+        |""".stripMargin
+    ok(code)(List(1))
+  }
+
+  test("default value in declaration") {
+    val code =
+      """
+        |{ int x; write x; }
+        |""".stripMargin
+    ok(code)(List(0))
+  }
+
+  test("cast float to int") {
+    val code =
+      """
+        |{ write (int)1.1; }
+        |""".stripMargin
+    ok(code)(List(1))
   }
 }

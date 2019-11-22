@@ -19,14 +19,13 @@ case class CompoundStmt(stmts: List[Stmt]) extends Stmt {
     res
   }
 }
-abstract case class SelectionStmt(expr: Expr, stmt1: Stmt, stmt2: Option[Stmt]) extends Stmt
 
 case class DeclarationStmt(tp: Type, as: List[(Identifier, Option[Expr])]) extends Stmt {
   override def gen(implicit env: Env): String = {
     as.map {
-      case (identifier, maybeExpr) =>
+      case (identifier, expr) =>
         env.symbolTable.registerIdentifier(identifier, tp)
-        maybeExpr.fold("")(_.gen + Ins.str(tp.code, 0, env.symbolTable.getIdentifier(identifier).get._2))
+        expr.fold(Ins.ldc(tp.code, "0"))(_.gen) + Ins.str(tp.code, 0, env.symbolTable.getIdentifier(identifier).get._2)
     }.mkString
   }
 }
@@ -47,6 +46,17 @@ case class IfStmt(expr: Expr, s1: Stmt, s2: Stmt) extends Stmt {
       (if (!expr.tp.isInstanceOf[CXBool]) Ins.conv(expr.tp.code, Ins.b) else "") +
       Ins.fjp(elseLabel) + s1.gen + Ins.ujp(endLabel) +
       Ins.label(elseLabel) + s2.gen + Ins.label(endLabel)
+  }
+}
+
+// for (s1 s2 s3) s4
+case class ForStmt(s1: Stmt, s2: Expr, s3: Stmt, s4: Stmt) extends Stmt {
+  override def gen(implicit env: Env): String = {
+    val startLabel = Ins.createLabel
+    val endLabel = Ins.createLabel
+    s1.gen +
+      Ins.label(startLabel) + s4.gen + s3.gen + s2.gen + Ins.fjp(endLabel) +
+      Ins.ujp(startLabel) + Ins.label(endLabel)
   }
 }
 
