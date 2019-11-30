@@ -21,7 +21,8 @@ class CXParser extends StandardTokenParsers
     "if", "else", // selection
     "while", "repeat", "until", "do", "for", // loop
     "write", "read", // builtins
-    "exit",  "function", "return"
+    "exit",  "function", "return",
+    "true", "false",
   )
   lexical.delimiters ++= List(
     "++", "--",
@@ -90,6 +91,7 @@ class CXParser extends StandardTokenParsers
   lazy val primary_expression: PackratParser[Expr] =
     ident ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ { case id ~ args => FunctionCallExpr(id, args) } |
     numericLit ^^ Num |
+    ("true" | "false") ^^ { s => Num(s.substring(0, 1)) } |
     identifier |
     "(" ~> expression <~ ")"
 

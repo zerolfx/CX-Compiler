@@ -7,7 +7,9 @@ trait withType {
 abstract class Expr extends Node with withType
 
 case class Num(numberLit: String) extends Expr {
-  override var tp: Type = numberLit.toIntOption.fold(CXReal(): Type)(_ => CXInt())
+  override var tp: Type =
+    if (numberLit == "t" || numberLit == "f") CXBool()
+    else numberLit.toIntOption.fold(CXReal(): Type)(_ => CXInt())
 
   override def gen(implicit env: Env): String = Ins.ldc(tp.code, numberLit)
 }
@@ -84,7 +86,7 @@ case class AssignExpr(id: Identifier, expr: Expr) extends Expr {
 
 case class FunctionCallExpr(name: String, args: List[Expr]) extends Expr {
   override def gen(implicit env: Env): String = {
-    // TODO chech arguments
+    // TODO check arguments
     val fun = env.funTable.getFunction(name).get
     tp = fun._1
     Ins.mst(0) + args.map(_.gen).mkString + Ins.cup(args.map(_.tp.getSize).sum, "fun" + name)

@@ -125,4 +125,28 @@ class CXSpec extends FunSuite {
         |""".stripMargin
     ok(code)(List(1))
   }
+
+  test("bool declaration and output") {
+    val code =
+      """
+        |{ bool x; write x; }
+        |""".stripMargin
+    ok(code)(List("f"))
+  }
+
+  test("bool assignment") {
+    val code =
+      """
+        |{ bool x = true; write x; }
+        |""".stripMargin
+    ok(code)(List("t"))
+  }
+
+  test("assign compare result to bool") {
+    val code =
+      """
+        |{ bool x = 1 < 2; write x; }
+        |""".stripMargin
+    ok(code)(List("t"))
+  }
 }

@@ -25,7 +25,7 @@ case class DeclarationStmt(tp: Type, as: List[(Identifier, Option[Expr])]) exten
     as.map {
       case (identifier, expr) =>
         env.symbolTable.registerIdentifier(identifier, tp)
-        expr.fold(Ins.ldc(tp.code, "0"))(_.gen) + Ins.str(tp.code, 0, env.symbolTable.getIdentifier(identifier).get._2)
+        expr.fold(Ins.ldc(tp.code, tp.default))(_.gen) + Ins.str(tp.code, 0, env.symbolTable.getIdentifier(identifier).get._2)
     }.mkString
   }
 }
