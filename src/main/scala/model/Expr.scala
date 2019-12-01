@@ -45,7 +45,11 @@ abstract class Identifier extends Expr {
 }
 
 case class ArrayIdentifier(name: String, sub: List[Expr]) extends Identifier {
-  override def gen(implicit env: Env): String = ???
+  override def gen(implicit env: Env): String = {
+    val (_tp: CXArray, addr) = env.symbolTable.getIdentifier(this).get
+    tp = _tp.baseType
+    _tp.genAddr(sub, addr) + Ins.ind(tp.code)
+  }
 
   override var tp: Type = _
 }
@@ -73,12 +77,19 @@ case class CastExpr(var tp: Type, expr: Expr) extends Expr {
 }
 
 case class AssignExpr(id: Identifier, expr: Expr) extends Expr {
-  override def gen(implicit env: Env): String = {
-    val (_tp, addr) = env.symbolTable.getIdentifier(id).get
-    val res = expr.gen
-    if (_tp.`const`) throw new Exception("assign to const.")
-    if (_tp.getClass == expr.tp.getClass) tp = _tp else throw new Exception("type...")
-    res + Ins.dpl(tp.code) + Ins.str(tp.code, 0, addr)
+  override def gen(implicit env: Env): String = id match {
+    case id: ArrayIdentifier =>
+      val (_tp: CXArray, addr) = env.symbolTable.getIdentifier(id).get
+      val res = expr.gen
+      if (_tp.`const`) throw new Exception("assign to const.")
+      if (_tp.baseType.getClass == expr.tp.getClass) tp = _tp.baseType else throw new Exception("type...")
+      _tp.genAddr(id.sub, addr) + res + Ins.sto(tp.code) + id.gen
+    case _ =>
+      val (_tp, addr) = env.symbolTable.getIdentifier(id).get
+      val res = expr.gen
+      if (_tp.`const`) throw new Exception("assign to const.")
+      if (_tp.getClass == expr.tp.getClass) tp = _tp else throw new Exception("type...")
+      res + Ins.dpl(tp.code) + Ins.str(tp.code, 0, addr)
   }
 
   override var tp: Type = _

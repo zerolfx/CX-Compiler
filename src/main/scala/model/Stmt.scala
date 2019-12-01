@@ -23,6 +23,14 @@ case class CompoundStmt(stmts: List[Stmt]) extends Stmt {
 case class DeclarationStmt(tp: Type, as: List[(Identifier, Option[Expr])]) extends Stmt {
   override def gen(implicit env: Env): String = {
     as.map {
+      case (identifier: ArrayIdentifier, expr) =>
+        assert(expr.isEmpty)
+        env.symbolTable.registerIdentifier(identifier, CXArray(tp, identifier.sub.map {
+          case Num(numberLit) => numberLit.toInt
+        }))
+        val (arrTp, addr) = env.symbolTable.getIdentifier(identifier).get
+        (0 until arrTp.getSize).map(i =>
+          Ins.ldc(tp.code, tp.default) + Ins.str(tp.code, 0, addr + i)).mkString
       case (identifier, expr) =>
         env.symbolTable.registerIdentifier(identifier, tp)
         expr.fold(Ins.ldc(tp.code, tp.default))(_.gen) + Ins.str(tp.code, 0, env.symbolTable.getIdentifier(identifier).get._2)

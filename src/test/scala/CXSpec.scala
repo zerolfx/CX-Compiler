@@ -6,6 +6,10 @@ class CXSpec extends FunSuite {
     assert(Compiler.go(code) == xs.map(_.toString))
   }
 
+  def ce(code: String): Unit = {
+    assertThrows(Compiler.go(code))
+  }
+
   test("simple arithmetic operation") {
     val code =
       """
@@ -75,6 +79,25 @@ class CXSpec extends FunSuite {
         |""".stripMargin
     ok(code)(List(45))
   }
+
+  test("declaration in for") {
+    val code =
+      """
+        |{ for (int i = 0; i < 10; i = i + 1) write i; }
+        |""".stripMargin
+    ok(code)((0 until 10).toList)
+  }
+
+//  test("declaration in for does not escape") {
+//    val code =
+//      """
+//        |{
+//        | for (int i = 0; i < 10; i = i + 1);
+//        | write i;
+//        |}
+//        |""".stripMargin
+//    ce(code)
+//  }
 
   test("simple while") {
     val code =
@@ -148,5 +171,34 @@ class CXSpec extends FunSuite {
         |{ bool x = 1 < 2; write x; }
         |""".stripMargin
     ok(code)(List("t"))
+  }
+
+  test("declare array") {
+    val code =
+      """
+        |{ int a[10]; }
+        |""".stripMargin
+    ok(code)(List())
+  }
+
+  test("array assignment and output") {
+    val code =
+      """
+        |{ int a[10];  a[2] = 5; write a[2]; }
+        |""".stripMargin
+    ok(code)(List(5))
+  }
+
+  test("2d array assignment and output") {
+    val code =
+      """
+        |{
+        |   int a[10][5];
+        |   for (int i = 0; i < 10; i = i + 1)
+        |     for (int j = 0; j < 5; j = j + 1)
+        |       { a[i][j] = i * 5 + j; write a[i][j]; }
+        |}
+        |""".stripMargin
+    ok(code)((0 until 5 * 10).toList)
   }
 }

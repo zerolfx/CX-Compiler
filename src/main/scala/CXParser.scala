@@ -28,8 +28,10 @@ class CXParser extends StandardTokenParsers
     "++", "--",
     "+", "-", "*", "/", "%",
     "<", "<=", ">", ">=", "==", "!=", "=",
-    "||", "&&", "!", ";", "(",
-    ")", "{", "}", "/*", "*/", ",")
+    "||", "&&", "!", ";",
+    "(", ")", "{", "}", "[", "]",
+    "/*", "*/", ",",
+  )
 
   lazy val type_specifier: Parser[Type] =
     "int" ^^ { _ => CXInt() } |
@@ -50,14 +52,12 @@ class CXParser extends StandardTokenParsers
     (declarator <~ "=") ~ assignment_expression ^^ { case d ~ e => (d, Some(e))} |
     declarator ^^ { (_, None) }
 
-  lazy val declarator: PackratParser[Identifier] =
-    ident ^^ { SingleIdentifier } |
-    ident ~ ("[" ~> constant_expression <~ "]").* ^^ { case i ~ e => ArrayIdentifier(i, e) }
+  lazy val declarator: PackratParser[Identifier] = identifier
 
   lazy val expression: PackratParser[Expr] = assignment_expression
 
   lazy val assignment_expression: PackratParser[Expr] =
-    (ident <~ "=") ~ assignment_expression ^^ { case i ~ e => AssignExpr(SingleIdentifier(i), e)} |
+    (identifier <~ "=") ~ assignment_expression ^^ { case i ~ e => AssignExpr(i, e)} |
     constant_expression
 
   def build_binary_op_expr(old_expr: PackratParser[Expr], op: Parser[String]): PackratParser[Expr] = {

@@ -39,6 +39,15 @@ case class CXArray(baseType: Type, shape: List[Int]) extends Type {
   val code = baseType.code
   override def getSize: Int = shape.product
   override def default: String = baseType.default
+  private val weight = shape.scanRight(1)((n, s) => n * s).drop(1)
+  def genAddr(sub: List[Expr], addr: Int)(implicit env: Env): String = {
+    Ins.ldc(Ins.i, addr.toString) +
+    sub.zip(weight).map {
+      case (expr, w) =>
+        expr.gen + Ins.ldc(Ins.i, w.toString) + Ins.mul(Ins.i) + Ins.add(Ins.i)
+    }.mkString +
+    Ins.conv(Ins.i, Ins.a)
+  }
 }
 
 case object CXVoid extends Type {
