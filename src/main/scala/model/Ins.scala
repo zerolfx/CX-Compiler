@@ -21,6 +21,7 @@ object Ins {
   def neg(t: T) = f"div $t\n"
   def and = "and\n"
   def or = "or\n"
+  def xor = "xor\n"
   def not = "not\n"
   def equ(t: T) = f"equ $t\n"
   def geq(t: T) = f"geq $t\n"

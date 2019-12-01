@@ -230,4 +230,12 @@ class CXSpec extends FunSuite {
         |""".stripMargin
     ok(code)((0 until 5 * 10).toList)
   }
+
+  test("xor support") {
+    val code =
+      """
+        |{ write true xor false; write true xor true; }
+        |""".stripMargin
+    ok(code)(List("t", "f"))
+  }
 }

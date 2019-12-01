@@ -27,7 +27,10 @@ case class BinaryOp(op: String, var left: Expr, right: Expr) extends Expr {
       case "/" => Ins.div(tp.code)
       case "%" => Ins.mod
       case "&&" => Ins.and
+      case "and" => Ins.and
       case "||" => Ins.or
+      case "or" => Ins.or
+      case "xor" => Ins.xor
       case "==" => Ins.equ(tp.code)
       case ">=" => Ins.geq(tp.code)
       case "<=" => Ins.leq(tp.code)

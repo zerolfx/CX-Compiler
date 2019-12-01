@@ -23,12 +23,14 @@ class CXParser extends StandardTokenParsers
     "write", "read", // builtins
     "exit",  "function", "return",
     "true", "false",
+    "and", "or", "not", "xor"
   )
   lexical.delimiters ++= List(
     "++", "--",
     "+", "-", "*", "/", "%",
     "<", "<=", ">", ">=", "==", "!=", "=",
-    "||", "&&", "!", ";",
+    "||", "&&", "!", "^",
+    ";",
     "(", ")", "{", "}", "[", "]",
     "/*", "*/", ",",
   )
@@ -72,8 +74,8 @@ class CXParser extends StandardTokenParsers
     "+" | "-",
     "<" | ">" | "<=" | ">=",
     "==" | "!=",
-    "&&",
-    "||").foldLeft(cast_expression)(build_binary_op_expr)
+    "&&" | "and",
+    "||" | "or" | "xor").foldLeft(cast_expression)(build_binary_op_expr)
 
   lazy val cast_expression: PackratParser[Expr] =
     unary_expression |
