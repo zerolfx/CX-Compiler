@@ -143,6 +143,17 @@ class CXSpec extends FunSuite {
     ok(code)(List(45))
   }
 
+  test("simple do while") {
+    val code =
+      """
+        |{
+        | int i = 0;
+        | do { write i; i = i + 1; } while (i < 10);
+        |}
+        |""".stripMargin
+    ok(code)((0 until 10).toList)
+  }
+
   test("function without parameter") {
     val code =
       """

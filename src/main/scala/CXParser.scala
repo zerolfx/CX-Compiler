@@ -119,6 +119,7 @@ class CXParser extends StandardTokenParsers
       case s1 ~ s2 ~ s3 ~ s4 => ForStmt(s1, s2, ExprStmt(s3), s4)
     } |
     "while" ~> ("(" ~> expression <~ ")") ~ statement ^^ { case e ~ s => ForStmt(EmptyStmt, e, EmptyStmt, s); } |
+    ("do" ~> statement <~ "while") ~ ("(" ~> expression <~ ")") <~ ";" ^^ {case s ~ e => ForStmt(s, e, EmptyStmt, s) } | // TODO need optimize
     "return" ~> opt(expression) <~ ";" ^^ ReturnStmt |
     "exit" ^^^ ExitStmt
 
