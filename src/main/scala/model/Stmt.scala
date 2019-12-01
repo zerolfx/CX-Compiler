@@ -42,6 +42,10 @@ case object EmptyStmt extends Stmt {
   override def gen(implicit env: Env): String = ""
 }
 
+case object ExitStmt extends Stmt {
+  override def gen(implicit env: Env): String = Ins.hlt
+}
+
 case class ExprStmt(expr: Expr) extends Stmt {
   override def gen(implicit env: Env): String = expr.gen + Ins.pop
 }

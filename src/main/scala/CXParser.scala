@@ -119,7 +119,8 @@ class CXParser extends StandardTokenParsers
       case s1 ~ s2 ~ s3 ~ s4 => ForStmt(s1, s2, ExprStmt(s3), s4)
     } |
     "while" ~> ("(" ~> expression <~ ")") ~ statement ^^ { case e ~ s => ForStmt(EmptyStmt, e, EmptyStmt, s); } |
-    "return" ~> opt(expression) <~ ";" ^^ ReturnStmt
+    "return" ~> opt(expression) <~ ";" ^^ ReturnStmt |
+    "exit" ^^^ ExitStmt
 
   lazy val program: PackratParser[Program] = rep(function) ~ compound_statement ^^ {
     case f ~ p => Program(f, p)

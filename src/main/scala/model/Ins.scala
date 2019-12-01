@@ -12,6 +12,7 @@ object Ins {
   object v extends T { override def toString: String = "?"}
 
   // TODO change T to N
+  def hlt = "hlt\n"
   def pop = "pop\n"
   def add(t: T) = f"add $t\n"
   def sub(t: T) = f"sub $t\n"

@@ -238,4 +238,12 @@ class CXSpec extends FunSuite {
         |""".stripMargin
     ok(code)(List("t", "f"))
   }
+
+  test("exit support") {
+    val code =
+      """
+        |{ write 1; exit; write 2; }
+        |""".stripMargin
+    ok(code)(List(1))
+  }
 }

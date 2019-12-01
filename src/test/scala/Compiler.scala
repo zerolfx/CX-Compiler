@@ -9,7 +9,7 @@ object Compiler extends App {
     parser.parseAll(parser.program, sourceCode) match {
       case parser.Success(r, n) =>
         println(r)
-        val code = r.gen + "hlt\n"
+        val code = r.gen
         //      println(code)
         val lines: Array[String] = code.split("\n")
         lines.zipWithIndex.foreach { case (s, i) => println(f"$i: $s") }

@@ -8,6 +8,6 @@ case class Program(funs: List[Fun], stmts: CompoundStmt) {
 
     val env = Env(funTable, new SymbolTable)
     val res = stmts.gen(env)
-    Ins.ujp("main") + r1 + Ins.label("main") + Ins.ssp(env.symbolTable.maxAllocated) + res
+    Ins.ujp("main") + r1 + Ins.label("main") + Ins.ssp(env.symbolTable.maxAllocated) + res + Ins.hlt
   }
 }
