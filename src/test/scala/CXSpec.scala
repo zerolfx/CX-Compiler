@@ -1,3 +1,4 @@
+import model.{CXInt, SingleIdentifier, SymbolTable}
 import org.scalatest.FunSuite
 
 
@@ -7,7 +8,19 @@ class CXSpec extends FunSuite {
   }
 
   def ce(code: String): Unit = {
-    assertThrows(Compiler.go(code))
+    intercept[Exception](Compiler.go(code))
+  }
+
+  test("symbol table") {
+    val t = new SymbolTable
+    val id = SingleIdentifier("x")
+    t.openEnv()
+    t.openEnv()
+    t.registerIdentifier(id, CXInt())
+    assert(t.getIdentifier(id) == Some(CXInt(), 0))
+    t.closeEnv()
+    assert(t.getIdentifier(id).isEmpty)
+    t.closeEnv()
   }
 
   test("simple arithmetic operation") {
@@ -18,6 +31,22 @@ class CXSpec extends FunSuite {
         |}
         |""".stripMargin
     ok(code)(List(73))
+  }
+
+  test("variable usage must after declaration") {
+    val code =
+      """
+        |{ write x; }
+        |""".stripMargin
+    ce(code)
+  }
+
+  test("declaration does not escape compound statement") {
+    val code =
+      """
+        |{ { int x; } write x; }
+        |""".stripMargin
+    ce(code)
   }
 
   test("gcd") {
@@ -88,16 +117,16 @@ class CXSpec extends FunSuite {
     ok(code)((0 until 10).toList)
   }
 
-//  test("declaration in for does not escape") {
-//    val code =
-//      """
-//        |{
-//        | for (int i = 0; i < 10; i = i + 1);
-//        | write i;
-//        |}
-//        |""".stripMargin
-//    ce(code)
-//  }
+  test("declaration in for does not escape") {
+    val code =
+      """
+        |{
+        | for (int i = 0; i < 10; i = i + 1) write i;
+        | write i;
+        |}
+        |""".stripMargin
+    ce(code)
+  }
 
   test("simple while") {
     val code =

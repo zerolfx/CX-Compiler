@@ -62,9 +62,12 @@ case class ForStmt(s1: Stmt, s2: Expr, s3: Stmt, s4: Stmt) extends Stmt {
   override def gen(implicit env: Env): String = {
     val startLabel = Ins.createLabel
     val endLabel = Ins.createLabel
-    s1.gen +
+    env.symbolTable.openEnv()
+    val res = s1.gen +
       Ins.label(startLabel) + s4.gen + s3.gen + s2.gen + Ins.fjp(endLabel) +
       Ins.ujp(startLabel) + Ins.label(endLabel)
+    env.symbolTable.closeEnv()
+    res
   }
 }
 

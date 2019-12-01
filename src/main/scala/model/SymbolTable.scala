@@ -15,7 +15,7 @@ class SymbolTable {
 
   def registerIdentifier(identifier: Identifier, tp: Type): Unit = {
     if (ids.exists(_.contains(identifier.name))) throw new Exception(f"${identifier.name} is used.")
-    ids.last += identifier.name -> (tp, allocated)
+    ids.top += identifier.name -> (tp, allocated)
     allocated += tp.getSize
     maxAllocated = maxAllocated.max(allocated)
   }
