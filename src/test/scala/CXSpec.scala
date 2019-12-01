@@ -163,6 +163,32 @@ class CXSpec extends FunSuite {
     ok(code)(List(1))
   }
 
+  test("simple break") {
+    val code =
+      """
+        |{
+        |   for (int i = 0; i < 10; i = i + 1) {
+        |       write i;
+        |       if (i == 5) break;
+        |   }
+        |}
+        |""".stripMargin
+    ok(code)((0 to 5).toList)
+  }
+
+  test("simple continue") {
+    val code =
+      """
+        |{
+        |   for (int i = 0; i < 10; i = i + 1) {
+        |     if (i <= 5) continue;
+        |     write i;
+        |   }
+        |}
+        |""".stripMargin
+    ok(code)((6 until 10).toList)
+  }
+
   test("function call function") {
     val code =
       """

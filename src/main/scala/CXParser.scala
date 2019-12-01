@@ -19,7 +19,7 @@ class CXParser extends StandardTokenParsers
   lexical.reserved ++= List(
     "int", "bool", "real", "const", // type
     "if", "else", // selection
-    "while", "repeat", "until", "do", "for", // loop
+    "while", "repeat", "until", "do", "for", "break", "continue", // loop
     "write", "read", // builtins
     "exit",  "function", "return",
     "true", "false",
@@ -121,6 +121,8 @@ class CXParser extends StandardTokenParsers
     "while" ~> ("(" ~> expression <~ ")") ~ statement ^^ { case e ~ s => ForStmt(EmptyStmt, e, EmptyStmt, s); } |
     ("do" ~> statement <~ "while") ~ ("(" ~> expression <~ ")") <~ ";" ^^ {case s ~ e => ForStmt(s, e, EmptyStmt, s) } | // TODO need optimize
     "return" ~> opt(expression) <~ ";" ^^ ReturnStmt |
+    "break" <~ ";" ^^^ BreakStmt |
+    "continue" <~ ";" ^^^ ContinueStmt |
     "exit" ^^^ ExitStmt
 
   lazy val program: PackratParser[Program] = rep(function) ~ compound_statement ^^ {

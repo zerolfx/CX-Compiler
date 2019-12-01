@@ -46,6 +46,14 @@ case object ExitStmt extends Stmt {
   override def gen(implicit env: Env): String = Ins.hlt
 }
 
+case object BreakStmt extends Stmt {
+  override def gen(implicit env: Env): String = Ins.ujp(env.symbolTable.getLoopEnd)
+}
+
+case object ContinueStmt extends Stmt {
+  override def gen(implicit env: Env): String = Ins.ujp(env.symbolTable.getLoopStart)
+}
+
 case class ExprStmt(expr: Expr) extends Stmt {
   override def gen(implicit env: Env): String = expr.gen + Ins.pop
 }
@@ -64,13 +72,16 @@ case class IfStmt(expr: Expr, s1: Stmt, s2: Stmt) extends Stmt {
 // for (s1 s2 s3) s4
 case class ForStmt(s1: Stmt, s2: Expr, s3: Stmt, s4: Stmt) extends Stmt {
   override def gen(implicit env: Env): String = {
-    val startLabel = Ins.createLabel
-    val endLabel = Ins.createLabel
+    val (_label, endLabel) = env.symbolTable.openLoop()
+    val beginLabel = Ins.createLabel
     env.symbolTable.openEnv()
-    val res = s1.gen +
-      Ins.label(startLabel) + s4.gen + s3.gen + s2.gen + Ins.fjp(endLabel) +
-      Ins.ujp(startLabel) + Ins.label(endLabel)
+    val res =
+      s1.gen +
+      Ins.label(beginLabel) +
+        s2.gen + Ins.fjp(endLabel) + s4.gen + Ins.label(_label) + s3.gen + Ins.ujp(beginLabel) +
+      Ins.label(endLabel)
     env.symbolTable.closeEnv()
+    env.symbolTable.closeLoop()
     res
   }
 }
