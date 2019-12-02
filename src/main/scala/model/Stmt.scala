@@ -4,7 +4,7 @@ abstract class Stmt extends Node
 
 
 case class WriteStmt(expr: Expr) extends Stmt {
-  override def gen(implicit env: Env): String = expr.gen(env) + Ins.out(expr.tp.code) +
+  override def gen(implicit env: Env): String = expr.gen + Ins.out(expr.tp.code) +
     Ins.ldc(Ins.c, "'\\n'") + Ins.out(Ins.c)
 }
 case class ReadStmt(identifier: Identifier) extends Stmt {

@@ -4,7 +4,13 @@ trait withType {
   var tp: Type
 }
 
-abstract class Expr extends Node with withType
+abstract class Expr extends Node with withType {
+  def res(s: => String)(block: => Unit): String = {
+    val res = s
+    block
+    res
+  }
+}
 
 case class Num(numberLit: String) extends Expr {
   override var tp: Type =
@@ -19,7 +25,7 @@ case class BinaryOp(op: String, var left: Expr, right: Expr) extends Expr {
 
   override def gen(implicit env: Env): String = {
     val res = left.gen + right.gen
-    tp = if (left.tp == right.tp) left.tp else throw new Exception("hhh")
+    tp = if (left.tp == right.tp) left.tp else throw new Exception("type does not match")
     val ret = res + (op match {
       case "+" => Ins.add(tp.code)
       case "-" => Ins.sub(tp.code)
@@ -70,7 +76,15 @@ case class SingleIdentifier(name: String) extends Identifier {
 }
 
 case class UnaryOp(op: String, expr: Expr) extends Expr {
-  override def gen(implicit env: Env): String = ???
+  override def gen(implicit env: Env): String = (op, expr) match {
+    case ("++", e: Identifier) => res(AssignExpr(e, BinaryOp("+", e, Num("1"))).gen) { tp = CXInt() }
+    case ("--", e: Identifier) => res(AssignExpr(e, BinaryOp("-", e, Num("1"))).gen) { tp = CXInt() }
+    case ("+", e) => res(e.gen) { tp = e.tp }
+    case ("-", e) => res(e.gen + Ins.neg(e.tp.code)) { tp = e.tp }
+    case ("!", e) => res(e.gen + Ins.not) { tp = e.tp }
+    case ("_++", e: Identifier) => res(BinaryOp("-", AssignExpr(e, BinaryOp("+", e, Num("1"))), Num("1")).gen) { tp = CXInt() }
+    case ("_--", e: Identifier) => res(BinaryOp("+", AssignExpr(e, BinaryOp("-", e, Num("1"))), Num("1")).gen) { tp = CXInt() }
+  }
 
   override var tp: Type = _
 }

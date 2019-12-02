@@ -176,6 +176,22 @@ class CXSpec extends FunSuite {
     ok(code)((0 to 5).toList)
   }
 
+  test("break in nested loop") {
+    val code =
+      """
+        |{
+        |   int s = 0;
+        |   for (int i = 0; i < 10; i = i + 1)
+        |     for (int j = 0; j < 10; j = j + 1) {
+        |         if (j > i) break;
+        |         s = s + j;
+        |     }
+        |   write s;
+        |}
+        |""".stripMargin
+    ok(code)(List(165))
+  }
+
   test("simple continue") {
     val code =
       """
@@ -283,4 +299,31 @@ class CXSpec extends FunSuite {
         |""".stripMargin
     ok(code)(List(1))
   }
+
+  test("negative number") {
+    val code =
+      """
+        |{
+        |   int x = 233;
+        |   write -x;
+        |}
+        |""".stripMargin
+    ok(code)(List(-233))
+  }
+
+  test("self prefix increment & decrement") {
+    val code =
+      """
+        |{ int x = 1; write ++x; write x; int y = 1; write --y; write y; }
+        |""".stripMargin
+    ok(code)(List(2, 2, 0, 0))
+  }
+
+//  test("self postfix increment & decrement") {
+//    val code =
+//      """
+//        |{ int x = 1; write x++; write x; }
+//        |""".stripMargin
+//    ok(code)(List(1, 0))
+//  }
 }

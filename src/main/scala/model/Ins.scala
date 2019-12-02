@@ -19,7 +19,7 @@ object Ins {
   def mul(t: T) = f"mul $t\n"
   def mod = "mod\n"
   def div(t: T) = f"div $t\n"
-  def neg(t: T) = f"div $t\n"
+  def neg(t: T) = f"neg $t\n"
   def and = "and\n"
   def or = "or\n"
   def xor = "xor\n"

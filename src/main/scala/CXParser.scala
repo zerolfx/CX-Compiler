@@ -35,7 +35,7 @@ class CXParser extends StandardTokenParsers
     "/*", "*/", ",",
   )
 
-  lazy val type_specifier: Parser[Type] =
+  lazy val type_specifier: PackratParser[Type] =
     "int" ^^ { _ => CXInt() } |
     "real" ^^ { _ => CXReal() } |
     "bool" ^^ { _ => CXBool() } |
@@ -47,7 +47,7 @@ class CXParser extends StandardTokenParsers
       case Some(_) ~ tp => tp.toConst
     }
 
-  lazy val declaration: Parser[DeclarationStmt] =
+  lazy val declaration: PackratParser[DeclarationStmt] =
     declaration_specifier ~ rep1sep(init_declarator, ",") ^^ { case d ~ i => DeclarationStmt(d, i) }
 
   lazy val init_declarator: PackratParser[(Identifier, Option[Expr])] =
@@ -84,7 +84,7 @@ class CXParser extends StandardTokenParsers
   lazy val unary_expression: PackratParser[Expr] =
     postfix_expression |
     ("++" | "--") ~ unary_expression ^^ { case op ~ e => UnaryOp(op, e) } |
-    ("+" | "-" | "~" | "!") ~ cast_expression ^^ { case op ~ e => UnaryOp(op, e) }
+    ("+" | "-" | "~" | "!") ~ unary_expression ^^ { case op ~ e => UnaryOp(op, e) }
 
   lazy val postfix_expression: PackratParser[Expr] =
     primary_expression |
@@ -96,7 +96,6 @@ class CXParser extends StandardTokenParsers
     ("true" | "false") ^^ { s => Num(s.substring(0, 1)) } |
     identifier |
     "(" ~> expression <~ ")"
-
 
   lazy val identifier: PackratParser[Identifier] =
     ident ~ rep1("[" ~> expression <~ "]") ^^ { case i ~ e => ArrayIdentifier(i, e) } |
