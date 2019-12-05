@@ -23,7 +23,8 @@ class CXParser extends StandardTokenParsers
     "write", "read", // builtins
     "exit",  "function", "return",
     "true", "false",
-    "and", "or", "not", "xor"
+    "and", "or", "not", "xor",
+    "odd"
   )
   lexical.delimiters ++= List(
     "++", "--",
@@ -84,7 +85,8 @@ class CXParser extends StandardTokenParsers
   lazy val unary_expression: PackratParser[Expr] =
     postfix_expression |
     ("++" | "--") ~ unary_expression ^^ { case op ~ e => UnaryOp(op, e) } |
-    ("+" | "-" | "~" | "!") ~ unary_expression ^^ { case op ~ e => UnaryOp(op, e) }
+    ("+" | "-" | "~" | "!") ~ unary_expression ^^ { case op ~ e => UnaryOp(op, e) } |
+    "odd" ~> unary_expression ^^ { e => BinaryOp("==", BinaryOp("%", e, Num("2")), Num("1")) }
 
   lazy val postfix_expression: PackratParser[Expr] =
     primary_expression |

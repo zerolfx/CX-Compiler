@@ -10,7 +10,7 @@ class SymbolTable {
 
   def openEnv(): Unit = ids.push(mutable.HashMap.empty)
   def closeEnv(): Unit = {
-    allocated -= ids.last.values.map(_._1.getSize).sum
+    allocated -= ids.top.values.map(_._1.getSize).sum
     ids.pop()
   }
 

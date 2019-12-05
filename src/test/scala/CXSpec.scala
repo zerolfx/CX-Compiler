@@ -73,6 +73,27 @@ class CXSpec extends FunSuite {
     ok(code)(List(3628800))
   }
 
+  test("prime sieve") {
+    val code =
+      """
+        |{
+        |   int pr[100], p_sz;
+        |   bool vis[100];
+        |   for (int i = 2; i < 100; ++i) {
+        |
+        |     if (!vis[i]) { pr[p_sz] = i; ++p_sz; }
+        |     for (int j = 0; j < p_sz; ++j) {
+        |       if (pr[j] * i >= 100) break;
+        |       vis[pr[j] * i] = true;
+        |       if (i % pr[j] == 0) break;
+        |     }
+        |   }
+        |   for (int i = 0; i < p_sz; ++i) write pr[i];
+        |}
+        |""".stripMargin
+    ok(code)(List(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97))
+  }
+
   test("simple if") {
     val code =
       """
@@ -317,6 +338,30 @@ class CXSpec extends FunSuite {
         |{ int x = 1; write ++x; write x; int y = 1; write --y; write y; }
         |""".stripMargin
     ok(code)(List(2, 2, 0, 0))
+  }
+
+  test("const") {
+    val code =
+      """
+        |{ const int x = 0; x = 1; }
+        |""".stripMargin
+    ce(code)
+  }
+
+  test("mod") {
+    val code =
+      """
+        |{ write 5 % 3; write 4 % 3; write 3 % 3; }
+        |""".stripMargin
+    ok(code)(List(2, 1, 0))
+  }
+
+  test("odd") {
+    val code =
+      """
+        |{ write odd 3; write odd 4; }
+        |""".stripMargin
+    ok(code)(List("t", "f"))
   }
 
 //  test("self postfix increment & decrement") {
