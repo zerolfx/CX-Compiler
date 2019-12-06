@@ -11,9 +11,11 @@ int mul2(int x) {
     return ret * x;
 }
 {
-int x = 0, y = 0, z = 0;
+// int x = 0, y = 0, z = 0;
 // x = (y = 1) = z = 2;
-write gcd(12, 18);
+int x, y;
+read x; read y;
+write gcd(x, y);
 write fac(10);
 write mul2(13);
 }

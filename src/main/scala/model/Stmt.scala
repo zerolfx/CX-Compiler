@@ -8,7 +8,10 @@ case class WriteStmt(expr: Expr) extends Stmt {
     Ins.ldc(Ins.c, "'\\n'") + Ins.out(Ins.c)
 }
 case class ReadStmt(identifier: Identifier) extends Stmt {
-  override def gen(implicit env: Env): String = Ins.in(identifier.tp.code)
+  override def gen(implicit env: Env): String = {
+    identifier.gen
+    Ins.in(identifier.tp.code) + AssignExpr(identifier, EmptyExpr(identifier.tp)).gen
+  }
 }
 
 case class CompoundStmt(stmts: List[Stmt]) extends Stmt {

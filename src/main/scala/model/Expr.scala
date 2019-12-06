@@ -12,6 +12,10 @@ abstract class Expr extends Node with withType {
   }
 }
 
+case class EmptyExpr(var tp: Type) extends Expr {
+  override def gen(implicit env: Env): String = ""
+};
+
 case class Num(numberLit: String) extends Expr {
   override var tp: Type =
     if (numberLit == "t" || numberLit == "f") CXBool()

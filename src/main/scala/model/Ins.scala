@@ -53,7 +53,7 @@ object Ins {
   def out(t: T) = f"out $t\n"
   def in(t: T) = {
     assert(t != a)
-    f"in $t \n"
+    f"in $t\n"
   }
   def conv(from: T, to: T) = f"conv $from $to\n"
 
