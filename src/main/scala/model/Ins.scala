@@ -38,7 +38,7 @@ object Ins {
   def ujp(label: String) = f"ujp $label\n"
   def fjp(label: String) = f"fjp $label\n"
   def lod(t: T, p: Int, q: Int) = f"lod $t $p $q\n"
-  def lda(t: T, p: Int, q: Int) = f"lda $t $p $q\n"
+  def lda(p: Int, q: Int) = f"lda $p $q\n"
   def str(t: T, p: Int, q: Int) = f"str $t $p $q\n"
 
   def mst(p: Int) = f"mst $p\n"

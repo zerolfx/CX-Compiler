@@ -41,7 +41,7 @@ case class CXArray(baseType: Type, shape: List[Int]) extends Type {
   override def default: String = baseType.default
   private val weight = shape.scanRight(1)((n, s) => n * s).drop(1)
   def genAddr(sub: List[Expr], addr: Int)(implicit env: Env): String = {
-    Ins.ldc(Ins.i, addr.toString) +
+    Ins.lda(0, addr) + Ins.conv(Ins.a, Ins.i) +
     sub.zip(weight).map {
       case (expr, w) =>
         expr.gen + Ins.ldc(Ins.i, w.toString) + Ins.mul(Ins.i) + Ins.add(Ins.i)

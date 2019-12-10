@@ -371,4 +371,27 @@ class CXSpec extends FunSuite {
 //        |""".stripMargin
 //    ok(code)(List(1, 0))
 //  }
+  test("array in function") {
+    val code =
+      """
+        |int f(int d) {
+        |   if (d == 0) return 0;
+        |   int s;
+        |   int a[10];
+        |   for (int i = 0; i < 10; ++i) {
+        |     a[i] = i * d;
+        |     s = s + a[i];
+        |   }
+        |   int r = f(d - 1);
+        |   for (int i = 0; i < 10; ++i) {
+        |     s = s + a[i];
+        |   }
+        |   return s + r;
+        |}
+        |{
+        |   write f(3);
+        |}
+        |""".stripMargin
+    ok(code)(List(45 * 6 * 2))
+  }
 }
